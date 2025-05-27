@@ -1,0 +1,22 @@
+spring:
+  datasource:
+    jdbc-url: jdbc:h2:file:./db/database.h2;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: password
+  messages:
+    basename: messages/error_messages
+
+# Header for HTTP Basic Authentication:
+# Authorization: Basic dXNlcjpwYXNzd29yZA==
+http-credentials:
+  username: user
+  password: password
+
+server:
+  port: 8000
+
+logging:
+  level:
+    root: INFO
+    org.springframework: INFO

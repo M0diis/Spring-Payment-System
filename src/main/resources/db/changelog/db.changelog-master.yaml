@@ -1,0 +1,8 @@
+databaseChangeLog:
+  - include:
+      file: tables/payments-table.yaml
+      relativeToChangelogFile: true
+
+  - include:
+      file: tables/notification-table.yaml
+      relativeToChangelogFile: true

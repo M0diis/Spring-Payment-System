@@ -1,0 +1,66 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1
+      author: modkzl
+      changes:
+        - createTable:
+            tableName: payment
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: type
+                  type: VARCHAR(10)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: amount
+                  type: DECIMAL(10,2)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: currency
+                  type: VARCHAR(3)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: debtor_iban
+                  type: VARCHAR(34)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: creditor_iban
+                  type: VARCHAR(34)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: details
+                  type: VARCHAR(255)
+              - column:
+                  name: creditor_bic
+                  type: VARCHAR(11)
+              - column:
+                  name: cancellation_fee
+                  type: DECIMAL(10,2)
+              - column:
+                  name: created_at
+                  type: TIMESTAMP
+                  defaultValueDate: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: cancelled
+                  type: BOOLEAN
+                  defaultValueBoolean: false
+              - column:
+                  name: cancelled_at
+                  type: TIMESTAMP
+                  constraints:
+                    nullable: true
+      rollback:
+        - dropTable:
+            tableName: payment
