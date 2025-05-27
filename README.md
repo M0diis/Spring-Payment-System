@@ -1,3 +1,5 @@
+[![Java CI with Gradle](https://github.com/M0diis/Spring-Payment-System/actions/workflows/gradle.yml/badge.svg)](https://github.com/M0diis/Spring-Payment-System/actions/workflows/gradle.yml)
+
 # Payment Service
 
 A Spring Boot application for managing payments, supporting creation, retrieval, cancellation, and filtering of
