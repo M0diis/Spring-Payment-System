@@ -98,7 +98,7 @@ The application will start on the configured port (default: 8000).
 
 ### 6. API Documentation
 
-Visit http://localhost:8080/swagger-ui/index.html for API docs.
+Visit http://localhost:8000/swagger-ui/index.html for API docs.
 
 ---
 
