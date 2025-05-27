@@ -1,5 +1,6 @@
 package me.modkzl;
 
+import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.scheduling.annotation.EnableAsync;
 
@@ -7,6 +8,6 @@ import org.springframework.scheduling.annotation.EnableAsync;
 @SpringBootApplication
 public class SpringApp {
     public static void main(String[] args) {
-        org.springframework.boot.SpringApplication.run(SpringApp.class, args);
+        SpringApplication.run(SpringApp.class, args);
     }
 }

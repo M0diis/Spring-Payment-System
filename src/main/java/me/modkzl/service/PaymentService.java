@@ -10,6 +10,7 @@ import me.modkzl.exception.EValidationException;
 import me.modkzl.jooq.public_.tables.records.PaymentRecord;
 import me.modkzl.mapper.payment.PaymentMapper;
 import me.modkzl.repository.payment.PaymentRepository;
+import me.modkzl.utils.TimeProvider;
 import me.modkzl.validation.ValidatorResolver;
 import org.springframework.stereotype.Service;
 
@@ -25,6 +26,7 @@ public class PaymentService {
     private final PaymentMapper paymentMapper;
     private final ValidatorResolver validatorResolver;
     private final NotificationService notificationService;
+    private final TimeProvider timeProvider;
 
     public @NotNull Long create(@NotNull PaymentDTO payment) {
         validatorResolver.validate(payment);
@@ -60,8 +62,14 @@ public class PaymentService {
             throw EValidationException.PAYMENT_ALREADY_CANCELLED.newException(id);
         }
 
-        LocalDateTime currentTime = LocalDateTime.now();
+        LocalDateTime currentTime = timeProvider.getLocalDateTimeNow();
         LocalDateTime creationTime = paymentEntity.getCreatedAt();
+        LocalDateTime endOfCreationDay = creationTime.toLocalDate().plusDays(1).atStartOfDay();
+
+        if (currentTime.isAfter(endOfCreationDay)) {
+            throw EValidationException.PAYMENT_CANCELLATION_NOT_ALLOWED.newException(id);
+        }
+
         long hoursInSystem = currentTime.getLong(ChronoField.HOUR_OF_DAY) - creationTime.getLong(ChronoField.HOUR_OF_DAY);
 
         final BigDecimal hoursInSystemBigDecimal = BigDecimal.valueOf(hoursInSystem);
@@ -72,6 +80,10 @@ public class PaymentService {
             case TYPE3 -> hoursInSystemBigDecimal.multiply(BigDecimal.valueOf(0.15));
             default -> throw EValidationException.PAYMENT_TYPE_NOT_SUPPORTED.newException(paymentEntity.getType());
         };
+
+        if (cancellationFee.compareTo(BigDecimal.ZERO) < 0) {
+            cancellationFee = BigDecimal.ZERO;
+        }
 
         paymentEntity.setCancelled(true);
         paymentEntity.setCancellationFee(cancellationFee);

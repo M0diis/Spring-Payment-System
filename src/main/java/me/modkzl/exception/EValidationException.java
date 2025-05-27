@@ -13,7 +13,8 @@ public enum EValidationException {
     BIC_MUST_NOT_BE_EMPTY_FOR_PAYMENT_TYPE3("102", "PAYMENTS_3"),
     PAYMENT_DOES_NOT_EXIST("103", "PAYMENTS_4"),
     PAYMENT_ALREADY_CANCELLED("104", "PAYMENTS_5"),
-    PAYMENT_TYPE_NOT_SUPPORTED("105", "PAYMENTS_6"),;
+    PAYMENT_TYPE_NOT_SUPPORTED("105", "PAYMENTS_6"),
+    PAYMENT_CANCELLATION_NOT_ALLOWED("105", "PAYMENTS_7");
 
     private final String errorCode;
     private final String messageCode;

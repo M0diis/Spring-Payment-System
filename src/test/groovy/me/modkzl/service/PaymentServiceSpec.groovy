@@ -10,6 +10,7 @@ import me.modkzl.jooq.public_.tables.records.PaymentRecord
 import me.modkzl.mapper.payment.PaymentMapper
 
 import me.modkzl.repository.payment.PaymentRepository
+import me.modkzl.utils.TimeProvider
 import me.modkzl.validation.ValidatorResolver
 import spock.lang.Specification
 import spock.lang.Subject
@@ -18,13 +19,24 @@ import java.time.LocalDateTime
 
 class PaymentServiceSpec extends Specification {
 
+    def static final CURRENT_TIME = LocalDateTime.of(2025, 05, 1, 12, 0)
+
     def paymentRepository = Mock(PaymentRepository)
     def paymentMapper = Mock(PaymentMapper)
     def validatorResolver = Mock(ValidatorResolver)
     def notificationService = Mock(NotificationService)
+    def timeProvider = Mock(TimeProvider)
 
     @Subject
-    def paymentService = new PaymentService(paymentRepository, paymentMapper, validatorResolver, notificationService)
+    def paymentService = new PaymentService(paymentRepository,
+            paymentMapper,
+            validatorResolver,
+            notificationService,
+            timeProvider)
+
+    def setup() {
+        timeProvider.getLocalDateTimeNow() >> CURRENT_TIME
+    }
 
     def "should process payment and return ID"() {
         given:
@@ -93,7 +105,7 @@ class PaymentServiceSpec extends Specification {
         given:
         def paymentEntity = new PaymentRecord(id: 1L,
                 type: paymentType,
-                createdAt: LocalDateTime.now().minusSeconds(hoursInSystem * 3600),
+                createdAt: CURRENT_TIME.minusSeconds(hoursInSystem * 3600),
                 cancelled: false)
 
         when:
@@ -132,5 +144,26 @@ class PaymentServiceSpec extends Specification {
         1 * paymentRepository.findById(1L) >> Optional.empty()
         def ex = thrown(ValidationException)
         ex.exception == EValidationException.PAYMENT_DOES_NOT_EXIST
+    }
+
+    def "should throw exception when cancelling payment after allowed window"() {
+        given:
+        def creationTime = CURRENT_TIME.minusDays(1)
+                .withHour(0)
+                .withMinute(0)
+                .withSecond(0)
+                .withNano(0)
+        def paymentEntity = new PaymentRecord(id: 1L,
+                type: EPaymentType.TYPE1,
+                createdAt: creationTime,
+                cancelled: false)
+
+        when:
+        paymentService.cancel(1L)
+
+        then:
+        1 * paymentRepository.findById(1L) >> Optional.of(paymentEntity)
+        def ex = thrown(ValidationException)
+        ex.exception == EValidationException.PAYMENT_CANCELLATION_NOT_ALLOWED
     }
 }
