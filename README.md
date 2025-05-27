@@ -59,11 +59,26 @@ The default configuration uses an H2 in-memory database for development.
 
 ### 5. Run the Application
 
-#### Local
+#### Gradle
 
 ```sh
 ./gradlew bootRun
 ```
+
+#### Jar
+
+Build the JAR file:
+
+```sh
+./gradlew build
+```
+
+Run the JAR file:
+
+```sh
+java -jar build/libs/payment-service-x.y.z.jar
+```
+Replace x.y.z with the actual version
 
 #### Docker
 
