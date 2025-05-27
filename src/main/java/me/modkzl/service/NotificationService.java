@@ -7,6 +7,7 @@ import me.modkzl.enums.EPaymentType;
 import me.modkzl.jooq.public_.tables.records.NotificationStatusRecord;
 import me.modkzl.repository.notification.ENotificationEndpoint;
 import me.modkzl.repository.notification.NotificationRepository;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -22,14 +23,17 @@ public class NotificationService {
 
     @Async
     public void notify(@NotNull EPaymentType paymentType, @NotNull Long paymentId) {
-        String url = getNotificationUrl(paymentType);
+        ENotificationEndpoint url = getNotificationEndpoint(paymentType);
 
         if (url == null) {
             return;
         }
 
         try {
-            ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
+            // For demonstration purposes, we will use a mock response
+            // ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
+            ResponseEntity<String> response = getMockResponse(url);
+
             boolean success = response.getStatusCode().is2xxSuccessful();
             saveNotificationStatus(paymentId, success);
             log.info("Notification for payment {} was {}", paymentId, success ? "successful" : "unsuccessful");
@@ -39,10 +43,19 @@ public class NotificationService {
         }
     }
 
-    private String getNotificationUrl(@NotNull EPaymentType paymentType) {
+    // Mock method to simulate external service response
+    private ResponseEntity<String> getMockResponse(@NotNull ENotificationEndpoint endpoint) {
+        return switch (endpoint) {
+            case SERVICE_1 -> new ResponseEntity<>("Mock response for SERVICE_1", HttpStatusCode.valueOf(Math.random() < 0.5 ? 200 : 500));
+            case SERVICE_2 -> new ResponseEntity<>("Mock response for SERVICE_2", HttpStatusCode.valueOf(Math.random() < 0.5 ? 200 : 500));
+            default -> throw new IllegalArgumentException("Unsupported notification endpoint: " + endpoint);
+        };
+    }
+
+    private ENotificationEndpoint getNotificationEndpoint(@NotNull EPaymentType paymentType) {
         return switch (paymentType) {
-            case TYPE1 -> ENotificationEndpoint.SERVICE_1.getUrl();
-            case TYPE2 -> ENotificationEndpoint.SERVICE_2.getUrl();
+            case TYPE1 -> ENotificationEndpoint.SERVICE_1;
+            case TYPE2 -> ENotificationEndpoint.SERVICE_2;
             default -> null;
         };
     }
