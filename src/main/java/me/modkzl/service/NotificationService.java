@@ -16,6 +16,7 @@ import org.springframework.web.client.RestTemplate;
 @Service
 @RequiredArgsConstructor
 @Slf4j
+// Alternatively can consider using Spring Events
 public class NotificationService {
 
     private final RestTemplate restTemplate;

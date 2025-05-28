@@ -70,14 +70,20 @@ public class PaymentService {
             throw EValidationException.PAYMENT_CANCELLATION_NOT_ALLOWED.newException(id);
         }
 
-        long hoursInSystem = currentTime.getLong(ChronoField.HOUR_OF_DAY) - creationTime.getLong(ChronoField.HOUR_OF_DAY);
+        BigDecimal hoursInSystem = BigDecimal.valueOf(currentTime.getLong(ChronoField.HOUR_OF_DAY)
+                - creationTime.getLong(ChronoField.HOUR_OF_DAY));
 
-        final BigDecimal hoursInSystemBigDecimal = BigDecimal.valueOf(hoursInSystem);
+        BigDecimal cancellationFee = calculateCancellationFee(paymentEntity, hoursInSystem);
 
+        paymentEntity.setCancelled(true);
+        paymentEntity.setCancellationFee(cancellationFee);
+    }
+
+    private BigDecimal calculateCancellationFee(PaymentRecord paymentEntity, BigDecimal hoursInSystem) {
         BigDecimal cancellationFee = switch (EPaymentType.valueOf(paymentEntity.getType())) {
-            case TYPE1 -> hoursInSystemBigDecimal.multiply(BigDecimal.valueOf(0.05));
-            case TYPE2 -> hoursInSystemBigDecimal.multiply(BigDecimal.valueOf(0.1));
-            case TYPE3 -> hoursInSystemBigDecimal.multiply(BigDecimal.valueOf(0.15));
+            case TYPE1 -> hoursInSystem.multiply(BigDecimal.valueOf(0.05));
+            case TYPE2 -> hoursInSystem.multiply(BigDecimal.valueOf(0.1));
+            case TYPE3 -> hoursInSystem.multiply(BigDecimal.valueOf(0.15));
             default -> throw EValidationException.PAYMENT_TYPE_NOT_SUPPORTED.newException(paymentEntity.getType());
         };
 
@@ -85,7 +91,6 @@ public class PaymentService {
             cancellationFee = BigDecimal.ZERO;
         }
 
-        paymentEntity.setCancelled(true);
-        paymentEntity.setCancellationFee(cancellationFee);
+        return cancellationFee;
     }
 }

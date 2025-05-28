@@ -11,7 +11,7 @@ import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.springframework.stereotype.Repository;
 
-import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 
 import static me.modkzl.jooq.public_.tables.Payment.PAYMENT;
@@ -21,7 +21,7 @@ import static me.modkzl.jooq.public_.tables.Payment.PAYMENT;
 public class PaymentRepository {
     private final DSLContext dslContext;
 
-    public Long save(@NotNull PaymentRecord payment) {
+    public @NotNull Long save(@NotNull PaymentRecord payment) {
         return dslContext.insertInto(PAYMENT)
                 .set(payment)
                 .returning(PAYMENT.ID)
@@ -29,7 +29,7 @@ public class PaymentRepository {
                 .getValue(PAYMENT.ID);
     }
 
-    public Collection<PaymentRecord> findAll(@NotNull PaymentFilterCriteria criteria) {
+    public @NotNull List<PaymentRecord> findAll(@NotNull PaymentFilterCriteria criteria) {
         Condition condition = new ConditionBuilder()
                 .andIn(PAYMENT.ID, criteria.getIds())
                 .andIn(PAYMENT.TYPE, criteria.getPaymentTypes() != null ?
@@ -60,7 +60,7 @@ public class PaymentRepository {
                 .fetchInto(PaymentRecord.class);
     }
 
-    public Optional<PaymentRecord> findById(@NotNull Long id) {
+    public @NotNull Optional<PaymentRecord> findById(@NotNull Long id) {
         return dslContext.selectFrom(PAYMENT)
                 .where(PAYMENT.ID.eq(id))
                 .fetchOptionalInto(PaymentRecord.class);
