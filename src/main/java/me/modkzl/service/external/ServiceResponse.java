@@ -1,0 +1,17 @@
+package me.modkzl.service.external;
+
+import lombok.Value;
+
+@Value
+public class ServiceResponse {
+    boolean success;
+    String message;
+
+    public static ServiceResponse success(String message) {
+        return new ServiceResponse(true, message);
+    }
+
+    public static ServiceResponse failure(String message) {
+        return new ServiceResponse(false, message);
+    }
+}

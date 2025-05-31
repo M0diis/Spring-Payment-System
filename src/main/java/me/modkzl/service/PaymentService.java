@@ -18,6 +18,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoField;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -26,6 +27,7 @@ public class PaymentService {
     private final PaymentMapper paymentMapper;
     private final ValidatorResolver validatorResolver;
     private final NotificationService notificationService;
+    private final CancellationFeeCalculator cancellationFeeCalculator;
     private final TimeProvider timeProvider;
 
     public @NotNull Long create(@NotNull PaymentDTO payment) {
@@ -73,24 +75,15 @@ public class PaymentService {
         BigDecimal hoursInSystem = BigDecimal.valueOf(currentTime.getLong(ChronoField.HOUR_OF_DAY)
                 - creationTime.getLong(ChronoField.HOUR_OF_DAY));
 
-        BigDecimal cancellationFee = calculateCancellationFee(paymentEntity, hoursInSystem);
+        Optional<EPaymentType> paymentType = EPaymentType.fromString(paymentEntity.getType());
+
+        if (paymentType.isEmpty()) {
+            throw EValidationException.PAYMENT_TYPE_NOT_SUPPORTED.newException(paymentEntity.getType());
+        }
+
+        BigDecimal cancellationFee = cancellationFeeCalculator.calculate(paymentType.get(), hoursInSystem);
 
         paymentEntity.setCancelled(true);
         paymentEntity.setCancellationFee(cancellationFee);
-    }
-
-    private BigDecimal calculateCancellationFee(PaymentRecord paymentEntity, BigDecimal hoursInSystem) {
-        BigDecimal cancellationFee = switch (EPaymentType.valueOf(paymentEntity.getType())) {
-            case TYPE1 -> hoursInSystem.multiply(BigDecimal.valueOf(0.05));
-            case TYPE2 -> hoursInSystem.multiply(BigDecimal.valueOf(0.1));
-            case TYPE3 -> hoursInSystem.multiply(BigDecimal.valueOf(0.15));
-            default -> throw EValidationException.PAYMENT_TYPE_NOT_SUPPORTED.newException(paymentEntity.getType());
-        };
-
-        if (cancellationFee.compareTo(BigDecimal.ZERO) < 0) {
-            cancellationFee = BigDecimal.ZERO;
-        }
-
-        return cancellationFee;
     }
 }

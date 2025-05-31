@@ -25,6 +25,7 @@ class PaymentServiceSpec extends Specification {
     def paymentMapper = Mock(PaymentMapper)
     def validatorResolver = Mock(ValidatorResolver)
     def notificationService = Mock(NotificationService)
+    def cancellationFeeCalculator = Mock(CancellationFeeCalculator)
     def timeProvider = Mock(TimeProvider)
 
     @Subject
@@ -32,6 +33,7 @@ class PaymentServiceSpec extends Specification {
             paymentMapper,
             validatorResolver,
             notificationService,
+            cancellationFeeCalculator,
             timeProvider)
 
     def setup() {
@@ -112,6 +114,8 @@ class PaymentServiceSpec extends Specification {
         paymentService.cancel(1L)
 
         then:
+        1 * cancellationFeeCalculator.calculate(paymentType, hoursInSystem) >>
+                BigDecimal.valueOf(hoursInSystem) * BigDecimal.valueOf(coefficient)
         1 * paymentRepository.findById(1L) >> Optional.of(paymentEntity)
         paymentEntity.cancelled
         paymentEntity.cancellationFee == BigDecimal.valueOf(hoursInSystem) * BigDecimal.valueOf(coefficient)
