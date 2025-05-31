@@ -1,12 +1,6 @@
 package me.modkzl.service.external;
 
-import lombok.Value;
-
-@Value
-public class ServiceResponse {
-    boolean success;
-    String message;
-
+public record ServiceResponse(boolean success, String message) {
     public static ServiceResponse success(String message) {
         return new ServiceResponse(true, message);
     }

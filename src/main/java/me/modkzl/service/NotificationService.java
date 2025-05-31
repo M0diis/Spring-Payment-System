@@ -30,8 +30,8 @@ public class NotificationService {
         }
 
         ServiceResponse response = externalServiceClient.get(endpoint);
-        saveNotificationStatus(paymentId, response.isSuccess());
-        log.info("Notification for payment {} was {}", paymentId, response.isSuccess() ? "successful" : "unsuccessful");
+        saveNotificationStatus(paymentId, response.success());
+        log.info("Notification for payment {} was {}", paymentId, response.success() ? "successful" : "unsuccessful");
     }
 
     private ENotificationEndpoint getNotificationEndpoint(@NotNull EPaymentType paymentType) {
